@@ -1,5 +1,8 @@
+import org.json.JSONArray;
+import org.json.JSONObject;
+import org.json.JSONString;
 
-public class NeuralNetwork {
+public class NeuralNetwork implements JSONString {
 
 	private int[] layerDepths;
 	private ActivationFunction[] activationFunctions;
@@ -37,6 +40,39 @@ public class NeuralNetwork {
 			 * column, layerDepths[i] + 1, is for bias variables.
 			 */
 			variables[i] = new FloatMatrix(layerDepths[i + 1], layerDepths[i] + 1);
+		}
+
+		setNumberOfVariables();
+	}
+	
+	NeuralNetwork(JSONObject JO) throws Exception {
+		JSONArray jSONLayerDepthsArray = JO.getJSONArray("layerDepths");
+		if (jSONLayerDepthsArray.length() < 2)
+			throw new Exception();
+		layerDepths = new int[jSONLayerDepthsArray.length()];
+
+		for (int i = 0; i < layerDepths.length; i++) {
+			if (jSONLayerDepthsArray.getInt(i) <= 0)
+				throw new Exception();
+			layerDepths[i] = jSONLayerDepthsArray.getInt(i);
+		}
+
+		JSONArray jSONActivationFunctionsArray = JO.getJSONArray("activationFunctions");
+		if (jSONActivationFunctionsArray.length() != layerDepths.length - 1)
+			throw new Exception();
+		activationFunctions = new ActivationFunction[jSONActivationFunctionsArray.length()];
+		for (int i = 0; i < activationFunctions.length; i++) {
+			activationFunctions[i] = jSONActivationFunctionsArray.getEnum(ActivationFunction.class, i);
+		}
+
+		JSONArray jSONVariablesArray = JO.getJSONArray("variables");
+		variables = new FloatMatrix[layerDepths.length - 1];
+		for (int i = 0; i < variables.length; i++) {
+			/*
+			 * the first 1 to layerDepths[i] columns are for weight variables, and the last
+			 * column, layerDepths[i] + 1, is for bias variables.
+			 */
+			variables[i] = new FloatMatrix(jSONVariablesArray.getJSONObject(i));
 		}
 
 		setNumberOfVariables();
@@ -174,6 +210,17 @@ public class NeuralNetwork {
 		default:
 			return sumValue;
 		}
+	}
+
+	@Override
+	public String toJSONString() {
+		JSONObject JO = new JSONObject();
+
+		JO.put("layerDepths", layerDepths);
+		JO.put("activationFunctions", activationFunctions);
+		JO.put("variables", variables);
+
+		return JO.toString();
 	}
 
 }

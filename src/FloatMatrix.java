@@ -1,5 +1,9 @@
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.json.JSONString;
 
-public class FloatMatrix {
+public class FloatMatrix implements JSONString {
 
 	private int numberOfRows;
 	private int numberOfColumns;
@@ -27,6 +31,18 @@ public class FloatMatrix {
 		}
 	}
 
+	public FloatMatrix(JSONObject jsonObject) throws JSONException, Exception {
+		this(jsonObject.getInt("numberOfRows"), jsonObject.getInt("numberOfColumns"));
+
+		JSONArray valuesJsonArray = jsonObject.getJSONArray("values");
+		for (int r = 0; r < numberOfRows; r++) {
+			JSONArray rowJsonArray = valuesJsonArray.getJSONArray(r);
+			for (int c = 0; c < numberOfColumns; c++) {
+				set(r, c, rowJsonArray.getFloat(c));
+			}
+		}
+	}
+
 	public void set(int r, int c, float value) {
 		values[r][c] = value;
 	}
@@ -49,35 +65,35 @@ public class FloatMatrix {
 	public FloatMatrix multipy(FloatMatrix matrix) throws Exception {
 		if (this.getNumberOfColumns() != matrix.getNumberOfRows())
 			throw new Exception();
-		
+
 		FloatMatrix a_matrix = this;
 		FloatMatrix b_matrix = matrix;
 		FloatMatrix c_matrix = new FloatMatrix(a_matrix.getNumberOfRows(), b_matrix.getNumberOfColumns());
-		
-		for(int r = 0; r < c_matrix.getNumberOfRows(); r++) {
-			for(int c = 0; c < c_matrix.getNumberOfColumns(); c++) {
+
+		for (int r = 0; r < c_matrix.getNumberOfRows(); r++) {
+			for (int c = 0; c < c_matrix.getNumberOfColumns(); c++) {
 				int sum = 0;
-				
-				for(int k = 0; k < a_matrix.getNumberOfColumns(); k++) {
+
+				for (int k = 0; k < a_matrix.getNumberOfColumns(); k++) {
 					sum += a_matrix.get(r, k) * b_matrix.get(k, c);
 				}
-				
+
 				c_matrix.set(r, c, sum);
 			}
 		}
-		
+
 		return c_matrix;
 	}
-	
+
 	public FloatMatrix transpose() throws Exception {
 		FloatMatrix transposedMatrix = new FloatMatrix(numberOfColumns, numberOfRows);
-		
-		for(int r = 0; r < transposedMatrix.getNumberOfRows(); r++) {
-			for(int c = 0; c < transposedMatrix.getNumberOfColumns(); c++) {
+
+		for (int r = 0; r < transposedMatrix.getNumberOfRows(); r++) {
+			for (int c = 0; c < transposedMatrix.getNumberOfColumns(); c++) {
 				transposedMatrix.set(r, c, get(c, r));
 			}
 		}
-		
+
 		return transposedMatrix;
 	}
 
@@ -99,7 +115,7 @@ public class FloatMatrix {
 			}
 
 			outputSB.append("]");
-			
+
 			if (r < numberOfRows - 1) {
 				outputSB.append(",\n");
 			}
@@ -108,6 +124,17 @@ public class FloatMatrix {
 		outputSB.append("]");
 
 		return outputSB.toString();
+	}
+
+	@Override
+	public String toJSONString() {
+		JSONObject JO = new JSONObject();
+		
+		JO.put("numberOfRows", numberOfRows);
+		JO.put("numberOfColumns", numberOfColumns);
+		JO.put("values", values);
+		
+		return JO.toString();
 	}
 
 }
