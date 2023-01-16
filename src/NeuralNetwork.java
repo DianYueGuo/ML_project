@@ -78,6 +78,17 @@ public class NeuralNetwork implements JSONString {
 		setNumberOfVariables();
 	}
 
+	public void variate(float rate) throws Exception {
+		if (rate < 0 || rate > 1)
+			throw new Exception();
+		
+		for(int i = 0; i < numberOfVariables; i++) {
+			if(Math.random() < rate) {
+				setVariableByIndex(i, (float) Math.random());
+			}
+		}
+	}
+
 	public int getNumberOfLayers() {
 		return layerDepths.length;
 	}
@@ -241,22 +252,22 @@ public class NeuralNetwork implements JSONString {
 
 		return JO.toString();
 	}
-	
+
 	@Override
 	public NeuralNetwork clone() {
 		try {
 			NeuralNetwork newNeuralNetwork = new NeuralNetwork(layerDepths, activationFunctions);
-			
-			for(int i = 0; i < newNeuralNetwork.variables.length; i++) {
+
+			for (int i = 0; i < newNeuralNetwork.variables.length; i++) {
 				newNeuralNetwork.variables[i] = this.variables[i].clone();
 			}
-			
+
 			return newNeuralNetwork;
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
+
 		return null;
 	}
 
