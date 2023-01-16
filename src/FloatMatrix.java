@@ -72,7 +72,7 @@ public class FloatMatrix implements JSONString {
 
 		for (int r = 0; r < c_matrix.getNumberOfRows(); r++) {
 			for (int c = 0; c < c_matrix.getNumberOfColumns(); c++) {
-				int sum = 0;
+				float sum = 0;
 
 				for (int k = 0; k < a_matrix.getNumberOfColumns(); k++) {
 					sum += a_matrix.get(r, k) * b_matrix.get(k, c);
