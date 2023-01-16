@@ -136,5 +136,23 @@ public class FloatMatrix implements JSONString {
 		
 		return JO.toString();
 	}
+	
+	@Override
+	public FloatMatrix clone() {
+		try {
+			FloatMatrix newFloatMatrix = new FloatMatrix(numberOfRows, numberOfColumns);
+			
+			for(int r = 0; r < numberOfRows; r++) {
+				newFloatMatrix.values[r] = values[r].clone();
+			}
+			
+			return newFloatMatrix;
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		return null;
+	}
 
 }

@@ -241,5 +241,23 @@ public class NeuralNetwork implements JSONString {
 
 		return JO.toString();
 	}
+	
+	@Override
+	public NeuralNetwork clone() {
+		try {
+			NeuralNetwork newNeuralNetwork = new NeuralNetwork(layerDepths, activationFunctions);
+			
+			for(int i = 0; i < numberOfVariables; i++) {
+				newNeuralNetwork.variables[i] = this.variables[i].clone();
+			}
+			
+			return newNeuralNetwork;
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		return null;
+	}
 
 }
