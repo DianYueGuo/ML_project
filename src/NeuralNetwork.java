@@ -44,7 +44,7 @@ public class NeuralNetwork implements JSONString {
 
 		setNumberOfVariables();
 	}
-	
+
 	NeuralNetwork(JSONObject JO) throws Exception {
 		JSONArray jSONLayerDepthsArray = JO.getJSONArray("layerDepths");
 		if (jSONLayerDepthsArray.length() < 2)
@@ -165,6 +165,25 @@ public class NeuralNetwork implements JSONString {
 		}
 
 		throw new Exception();
+	}
+
+	/*
+	 * "index" is from 0 to getNumberOfVariables() - 1. This method access variables
+	 * by index with a certain order.
+	 */
+	public void setVariableByIndex(int index, float value) throws Exception {
+		if (index < 0 || index >= numberOfVariables)
+			throw new Exception();
+
+		for (int i = 0; i < variables.length; i++) {
+			if (variables[i].getNumberOfRows() * variables[i].getNumberOfColumns() - 1 >= index) {
+				variables[i].set(index / variables[i].getNumberOfRows(), index % variables[i].getNumberOfColumns(),
+						value);
+				return;
+			} else {
+				index -= variables[i].getNumberOfRows() * variables[i].getNumberOfColumns();
+			}
+		}
 	}
 
 	public FloatMatrix getOutput(FloatMatrix inputLayer) throws Exception {
