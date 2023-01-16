@@ -60,9 +60,9 @@ public class FloatMatrix implements JSONString {
 	}
 
 	/*
-	 * "matrix_A.multipy(matrix_B)" means "AB"
+	 * "matrix_A.multiply(matrix_B)" means "AB"
 	 */
-	public FloatMatrix multipy(FloatMatrix matrix) throws Exception {
+	public FloatMatrix multiply(FloatMatrix matrix) throws Exception {
 		if (this.getNumberOfColumns() != matrix.getNumberOfRows())
 			throw new Exception();
 

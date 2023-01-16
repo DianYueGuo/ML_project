@@ -214,7 +214,7 @@ public class NeuralNetwork implements JSONString {
 			}
 			extendedLayer.set(extendedLayer.getNumberOfRows() - 1, 0, 1);
 
-			propagatedValues = variables[i].multipy(extendedLayer);
+			propagatedValues = variables[i].multiply(extendedLayer);
 
 			for (int r = 0; r < propagatedValues.getNumberOfRows(); r++) {
 				float sumValue = propagatedValues.get(r, 0);
