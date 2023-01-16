@@ -247,7 +247,7 @@ public class NeuralNetwork implements JSONString {
 		try {
 			NeuralNetwork newNeuralNetwork = new NeuralNetwork(layerDepths, activationFunctions);
 			
-			for(int i = 0; i < numberOfVariables; i++) {
+			for(int i = 0; i < newNeuralNetwork.variables.length; i++) {
 				newNeuralNetwork.variables[i] = this.variables[i].clone();
 			}
 			
