@@ -84,7 +84,7 @@ public class NeuralNetwork implements JSONString {
 
 		for (int i = 0; i < numberOfVariables; i++) {
 			if (Math.random() < rate) {
-				setVariableByIndex(i, (float) Math.random());
+				setVariableByIndex(i, (float) (Math.random() * 2 - 1));
 			}
 		}
 	}
