@@ -84,7 +84,7 @@ public class NeuralNetwork implements JSONString {
 
 		for (int i = 0; i < numberOfVariables; i++) {
 			if (Math.random() < rate) {
-				setVariableByIndex(i, (float) (Math.random() * 2 - 1));
+				setVariableByIndex(i, (float) (getVariableByIndex(i) + Math.random() * 2 - 1));
 			}
 		}
 	}
@@ -168,7 +168,7 @@ public class NeuralNetwork implements JSONString {
 
 		for (int i = 0; i < variables.length; i++) {
 			if (variables[i].getNumberOfRows() * variables[i].getNumberOfColumns() - 1 >= index) {
-				return variables[i].get(index / variables[i].getNumberOfRows(),
+				return variables[i].get(index / variables[i].getNumberOfColumns(),
 						index % variables[i].getNumberOfColumns());
 			} else {
 				index -= variables[i].getNumberOfRows() * variables[i].getNumberOfColumns();
