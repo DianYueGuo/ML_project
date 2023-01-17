@@ -243,6 +243,11 @@ public class NeuralNetwork implements JSONString {
 	}
 
 	@Override
+	public String toString() {
+		return toJSONString();
+	}
+
+	@Override
 	public String toJSONString() {
 		JSONObject JO = new JSONObject();
 
