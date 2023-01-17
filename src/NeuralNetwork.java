@@ -78,7 +78,7 @@ public class NeuralNetwork implements JSONString {
 		setNumberOfVariables();
 	}
 
-	public void variate(float rate) throws Exception {
+	public void mutate(float rate) throws Exception {
 		if (rate < 0 || rate > 1)
 			throw new Exception();
 
