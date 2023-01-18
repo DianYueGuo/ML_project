@@ -1,3 +1,5 @@
+package machine_learning;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -9,7 +11,7 @@ public class FloatMatrix implements JSONString {
 	private int numberOfColumns;
 	private float[][] values;
 
-	FloatMatrix(int numberOfRows, int numberOfColumns) throws Exception {
+	public FloatMatrix(int numberOfRows, int numberOfColumns) throws Exception {
 		if (numberOfRows <= 0)
 			throw new Exception();
 		this.numberOfRows = numberOfRows;
@@ -21,7 +23,7 @@ public class FloatMatrix implements JSONString {
 		this.values = new float[numberOfRows][numberOfColumns];
 	}
 
-	FloatMatrix(float[][] values) throws Exception {
+	public FloatMatrix(float[][] values) throws Exception {
 		this(values.length, values[0].length);
 
 		for (int r = 0; r < numberOfRows; r++) {

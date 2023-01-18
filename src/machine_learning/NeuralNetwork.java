@@ -1,3 +1,5 @@
+package machine_learning;
+
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.json.JSONString;
@@ -15,7 +17,7 @@ public class NeuralNetwork implements JSONString {
 	 * 
 	 * activationFunctions.length should be equal to layerDepths.length - 1.
 	 */
-	NeuralNetwork(int[] layerDepths, ActivationFunction[] activationFunctions) throws Exception {
+	public NeuralNetwork(int[] layerDepths, ActivationFunction[] activationFunctions) throws Exception {
 		if (layerDepths.length < 2)
 			throw new Exception();
 		this.layerDepths = new int[layerDepths.length];
@@ -45,7 +47,7 @@ public class NeuralNetwork implements JSONString {
 		setNumberOfVariables();
 	}
 
-	NeuralNetwork(JSONObject JO) throws Exception {
+	public NeuralNetwork(JSONObject JO) throws Exception {
 		JSONArray jSONLayerDepthsArray = JO.getJSONArray("layerDepths");
 		if (jSONLayerDepthsArray.length() < 2)
 			throw new Exception();
