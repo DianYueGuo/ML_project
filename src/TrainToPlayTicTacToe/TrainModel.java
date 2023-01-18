@@ -11,14 +11,15 @@ public class TrainModel {
 		NeuralNetwork model = new NeuralNetwork(new int[] { 9, 32, 32, 9, 1 },
 				new ActivationFunction[] { ActivationFunction.SIGMOID, ActivationFunction.SIGMOID,
 						ActivationFunction.SIGMOID, ActivationFunction.LINEAR });
-
+		model.mutate(1);
+		
 		for (int generation = 0; generation < 2000; generation++) {
-			NeuralNetwork[] players = new NeuralNetwork[80];
+			NeuralNetwork[] players = new NeuralNetwork[90];
 
 			players[0] = model;
 			for (int i = 1; i < players.length; i++) {
 				players[i] = model.clone();
-				players[i].mutate(0.01f);
+				players[i].mutate(0.03f);
 			}
 
 			int[] scores = new int[players.length];
@@ -37,8 +38,8 @@ public class TrainModel {
 						scores[j]++;
 						break;
 					}
-					scores[i] += game1.getMarkTimes() * 2;
-					scores[j] += game1.getMarkTimes() * 2;
+					scores[i] += game1.getMarkTimes() * 10;
+					scores[j] += game1.getMarkTimes() * 10;
 
 					TicTacToeGame game2 = match(players[j], players[i]);
 					switch (game2.getGameState()) {
@@ -53,8 +54,8 @@ public class TrainModel {
 						scores[i]++;
 						break;
 					}
-					scores[i] += game2.getMarkTimes() * 2;
-					scores[j] += game2.getMarkTimes() * 2;
+					scores[i] += game2.getMarkTimes() * 10;
+					scores[j] += game2.getMarkTimes() * 10;
 				}
 			}
 
@@ -69,6 +70,8 @@ public class TrainModel {
 
 			model = players[max_score_index];
 
+			System.out.println("generation: " + generation);
+			
 			System.out.println("score: " + scores[max_score_index]);
 			System.out.println(match(model, model));
 		}
