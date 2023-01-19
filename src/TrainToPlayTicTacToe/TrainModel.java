@@ -8,71 +8,100 @@ import machine_learning.NeuralNetwork;
 public class TrainModel {
 
 	public static NeuralNetwork train() throws Exception {
-		NeuralNetwork model = new NeuralNetwork(new int[] { 9, 32, 32, 9, 1 },
-				new ActivationFunction[] { ActivationFunction.SIGMOID, ActivationFunction.SIGMOID,
-						ActivationFunction.SIGMOID, ActivationFunction.SIGMOID });
-		model.mutate(1);
+		NeuralNetwork model1 = new NeuralNetwork(new int[] { 9, 36, 36, 1 }, new ActivationFunction[] {
+				ActivationFunction.SIGMOID, ActivationFunction.SIGMOID, ActivationFunction.SIGMOID });
+		NeuralNetwork model2 = model1.clone();
 
-		for (int generation = 0; generation < 3000; generation++) {
-			NeuralNetwork[] players = new NeuralNetwork[20];
+		model1.mutate(1);
+		model2.mutate(1);
 
-			players[0] = model;
-			for (int i = 1; i < players.length; i++) {
-				players[i] = model.clone();
-				players[i].mutate(0.005f);
+		for (int generation = 0; generation < 1000; generation++) {
+			NeuralNetwork[] players1 = new NeuralNetwork[100];
+			NeuralNetwork[] players2 = new NeuralNetwork[players1.length];
+
+			players1[0] = model1;
+			for (int i = 1; i < players1.length; i++) {
+				players1[i] = model1.clone();
+				players1[i].mutate(0.005f);
 			}
 
-			int[] scores = new int[players.length];
-			for (int i = 0; i < players.length; i++) {
-				for (int j = i + 1; j < players.length; j++) {
-					TicTacToeGame game1 = match(players[i], players[j]);
-					switch (game1.getGameState()) {
-					case DRAW:
-						scores[i]++;
-						scores[j]++;
-						break;
-					case PLAYER1_WIN:
-						scores[i]++;
-						break;
-					case PLAYER2_WIN:
-						scores[j]++;
-						break;
-					}
+			players2[0] = model2;
+			for (int i = 1; i < players2.length; i++) {
+				players2[i] = model2.clone();
+				players2[i].mutate(0.005f);
+			}
 
-					TicTacToeGame game2 = match(players[j], players[i]);
-					switch (game2.getGameState()) {
-					case DRAW:
-						scores[i]++;
-						scores[j]++;
-						break;
-					case PLAYER1_WIN:
-						scores[j]++;
-						break;
-					case PLAYER2_WIN:
-						scores[i]++;
-						break;
-					}
+			int[] scores1 = new int[players1.length];
+			int[] scores2 = new int[players1.length];
+			for (int i = 0; i < players1.length; i++) {
+				TicTacToeGame game1 = match(model2, players1[i]);
+				switch (game1.getGameState()) {
+				case DRAW:
+					scores1[i]++;
+					break;
+				case PLAYER2_WIN:
+					scores1[i]++;
+					break;
+				}
+
+				game1 = match(players1[i], model2);
+				switch (game1.getGameState()) {
+				case DRAW:
+					scores1[i]++;
+					break;
+				case PLAYER1_WIN:
+					scores1[i]++;
+					break;
+				}
+				
+				TicTacToeGame game2 = match(model1, players2[i]);
+				switch (game2.getGameState()) {
+				case DRAW:
+					scores2[i]++;
+					break;
+				case PLAYER2_WIN:
+					scores2[i]++;
+					break;
+				}
+
+				game2 = match(players2[i], model1);
+				switch (game2.getGameState()) {
+				case DRAW:
+					scores2[i]++;
+					break;
+				case PLAYER1_WIN:
+					scores2[i]++;
+					break;
 				}
 			}
 
-			int max_score = 0;
-			int max_score_index = 0;
-			for (int i = 0; i < scores.length; i++) {
-				if (scores[i] >= max_score) {
-					max_score = scores[i];
-					max_score_index = i;
+			int max_score1 = 0;
+			int max_score_index1 = 0;
+			for (int i = 0; i < scores1.length; i++) {
+				if (scores1[i] >= max_score1) {
+					max_score1 = scores1[i];
+					max_score_index1 = i;
 				}
 			}
 
-			model = players[max_score_index];
+			model1 = players1[max_score_index1];
+			
+			int max_score2 = 0;
+			int max_score_index2 = 0;
+			for (int i = 0; i < scores2.length; i++) {
+				if (scores2[i] >= max_score2) {
+					max_score2 = scores2[i];
+					max_score_index2 = i;
+				}
+			}
+
+			model2 = players2[max_score_index2];
 
 			System.out.println("generation: " + generation);
-
-			System.out.println("score: " + scores[max_score_index]);
-			System.out.println(match(model, model));
+			System.out.println(match(model1, model2));
 		}
 
-		return model;
+		return model1;
 	}
 
 	public static TicTacToeGame match(NeuralNetwork player1, NeuralNetwork player2) throws Exception {
@@ -121,8 +150,8 @@ public class TrainModel {
 			}
 
 			FloatMatrix modelOutput = model.getOutput(new FloatMatrix(board).transpose());
-			
-			if(modelOutput.get(0, 0) > maxProbability) {
+
+			if (modelOutput.get(0, 0) > maxProbability) {
 				maxProbability = modelOutput.get(0, 0);
 				nextMove = i;
 			}
