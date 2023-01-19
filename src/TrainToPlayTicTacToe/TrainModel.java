@@ -10,16 +10,16 @@ public class TrainModel {
 	public static NeuralNetwork train() throws Exception {
 		NeuralNetwork model = new NeuralNetwork(new int[] { 9, 32, 32, 9, 1 },
 				new ActivationFunction[] { ActivationFunction.SIGMOID, ActivationFunction.SIGMOID,
-						ActivationFunction.SIGMOID, ActivationFunction.LINEAR });
+						ActivationFunction.SIGMOID, ActivationFunction.SIGMOID });
 		model.mutate(1);
-		
-		for (int generation = 0; generation < 2000; generation++) {
-			NeuralNetwork[] players = new NeuralNetwork[90];
+
+		for (int generation = 0; generation < 3000; generation++) {
+			NeuralNetwork[] players = new NeuralNetwork[20];
 
 			players[0] = model;
 			for (int i = 1; i < players.length; i++) {
 				players[i] = model.clone();
-				players[i].mutate(0.03f);
+				players[i].mutate(0.005f);
 			}
 
 			int[] scores = new int[players.length];
@@ -38,8 +38,6 @@ public class TrainModel {
 						scores[j]++;
 						break;
 					}
-					scores[i] += game1.getMarkTimes() * 10;
-					scores[j] += game1.getMarkTimes() * 10;
 
 					TicTacToeGame game2 = match(players[j], players[i]);
 					switch (game2.getGameState()) {
@@ -54,8 +52,6 @@ public class TrainModel {
 						scores[i]++;
 						break;
 					}
-					scores[i] += game2.getMarkTimes() * 10;
-					scores[j] += game2.getMarkTimes() * 10;
 				}
 			}
 
@@ -71,11 +67,11 @@ public class TrainModel {
 			model = players[max_score_index];
 
 			System.out.println("generation: " + generation);
-			
+
 			System.out.println("score: " + scores[max_score_index]);
 			System.out.println(match(model, model));
 		}
-		
+
 		return model;
 	}
 
@@ -103,15 +99,36 @@ public class TrainModel {
 		if (model.getLayerDepth(0) != 9 || model.getLayerDepth(model.getNumberOfLayers() - 1) != 1)
 			throw new Exception();
 
-		FloatMatrix modelOutput = model
-				.getOutput(new FloatMatrix(new float[][] { { convertToNumber(game.getBlockState(0)),
-						convertToNumber(game.getBlockState(1)), convertToNumber(game.getBlockState(2)),
-						convertToNumber(game.getBlockState(3)), convertToNumber(game.getBlockState(4)),
-						convertToNumber(game.getBlockState(5)), convertToNumber(game.getBlockState(6)),
-						convertToNumber(game.getBlockState(7)), convertToNumber(game.getBlockState(8)) } })
-								.transpose());
+		float maxProbability = 0;
+		int nextMove = 0;
+		for (int i = 0; i < 9; i++) {
+			if (!game.isLegalToMark(i))
+				continue;
 
-		return (int) modelOutput.get(0, 0);
+			float[][] board = new float[][] { { convertToNumber(game.getBlockState(0)),
+					convertToNumber(game.getBlockState(1)), convertToNumber(game.getBlockState(2)),
+					convertToNumber(game.getBlockState(3)), convertToNumber(game.getBlockState(4)),
+					convertToNumber(game.getBlockState(5)), convertToNumber(game.getBlockState(6)),
+					convertToNumber(game.getBlockState(7)), convertToNumber(game.getBlockState(8)) } };
+
+			switch (game.getGameState()) {
+			case PLAYER1_TURN:
+				board[0][i] = convertToNumber(BlockState.MARKED_By_PLAYER1);
+				break;
+			case PLAYER2_TURN:
+				board[0][i] = convertToNumber(BlockState.MARKED_By_PLAYER2);
+				break;
+			}
+
+			FloatMatrix modelOutput = model.getOutput(new FloatMatrix(board).transpose());
+			
+			if(modelOutput.get(0, 0) > maxProbability) {
+				maxProbability = modelOutput.get(0, 0);
+				nextMove = i;
+			}
+		}
+
+		return nextMove;
 	}
 
 	private static int convertToNumber(BlockState blockState) throws Exception {
