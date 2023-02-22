@@ -1,9 +1,9 @@
-package TrainToPlayTicTacToe;
+package train_to_play_tic_tac_toe;
 
-import TrainToPlayTicTacToe.TicTacToeGame.BlockState;
 import machine_learning.ActivationFunction;
 import machine_learning.FloatMatrix;
 import machine_learning.NeuralNetwork;
+import train_to_play_tic_tac_toe.TicTacToeGame.BlockState;
 
 public class TrainModel {
 

@@ -2,8 +2,8 @@
 
 import org.json.JSONObject;
 
-import TrainToPlayTicTacToe.PlayTicTacToeGame;
 import machine_learning.NeuralNetwork;
+import train_to_play_tic_tac_toe.PlayTicTacToeGame;
 
 public class MainTest {
 

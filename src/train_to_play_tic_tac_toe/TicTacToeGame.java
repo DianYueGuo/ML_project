@@ -1,4 +1,4 @@
-package TrainToPlayTicTacToe;
+package train_to_play_tic_tac_toe;
 
 /*
  * the game board is numbered in the following way:
