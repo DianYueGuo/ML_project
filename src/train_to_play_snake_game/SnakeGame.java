@@ -4,13 +4,15 @@ import java.util.ArrayList;
 
 public class SnakeGame {
 
-	private final int FIELD_WIDTH = 16;
-	private final int FIELD_HEIGHT = 16;
+	public final static int FIELD_WIDTH = 16;
+	public final static int FIELD_HEIGHT = 16;
 
 	private ArrayList<Coordinate> snakeBody;
 	private boolean hasCollided;
 	private Coordinate appleCoordinate;
 	private boolean hasEatenApple;
+
+	private ScoreBoard scoreBoard;
 
 	public enum HeadDirection {
 		UP, DOWN, LEFT, RIGHT
@@ -18,6 +20,52 @@ public class SnakeGame {
 
 	public enum BlockState {
 		EMPTY, APPLE, SNAKE_BODY, SNAKE_HEAD
+	}
+
+	public class ScoreBoard {
+
+		private int totalNumberOfSteps;
+		private int numberOfApplesEaten;
+
+		ScoreBoard() {
+			totalNumberOfSteps = 0;
+			numberOfApplesEaten = 0;
+		}
+
+		void addStep() {
+			totalNumberOfSteps++;
+		}
+
+		void eatApple() {
+			numberOfApplesEaten++;
+		}
+
+		int getTotalNumberOfSteps() {
+			return totalNumberOfSteps;
+		}
+
+		int getNumberOfApplesEaten() {
+			return numberOfApplesEaten;
+		}
+
+		float getStepsPerApple() {
+			if (numberOfApplesEaten != 0) {
+				return totalNumberOfSteps / (float) numberOfApplesEaten;
+			} else {
+				return Float.MAX_VALUE;
+			}
+		}
+
+		@Override
+		public String toString() {
+			StringBuilder sb = new StringBuilder();
+			sb.append("NumberOfApplesEaten: " + numberOfApplesEaten + "\n");
+			sb.append("StepsPerApple: " + getStepsPerApple() + "\n");
+			sb.append("TotalNumberOfSteps: " + totalNumberOfSteps + "\n");
+
+			return sb.toString();
+		}
+
 	}
 
 	/*
@@ -54,7 +102,9 @@ public class SnakeGame {
 
 	}
 
-	SnakeGame() {
+	public SnakeGame() {
+		scoreBoard = new ScoreBoard();
+
 		snakeBody = new ArrayList<Coordinate>();
 
 		snakeBody.add(new Coordinate(FIELD_WIDTH / 2, FIELD_HEIGHT / 2));
@@ -65,30 +115,40 @@ public class SnakeGame {
 
 		spawnApple();
 	}
-	
+
+	public ScoreBoard getScoreBoard() {
+		return scoreBoard;
+	}
+
+	public boolean isEnd() {
+		return hasCollided;
+	}
+
 	public BlockState[][] getGameField() {
 		BlockState[][] gameField = new BlockState[FIELD_HEIGHT][FIELD_WIDTH];
-		
-		for(int y = 0; y < FIELD_HEIGHT; y++) {
-			for(int x = 0; x < FIELD_WIDTH; x++) {
+
+		for (int y = 0; y < FIELD_HEIGHT; y++) {
+			for (int x = 0; x < FIELD_WIDTH; x++) {
 				gameField[y][x] = BlockState.EMPTY;
 			}
 		}
-		
+
 		gameField[snakeBody.get(0).getY()][snakeBody.get(0).getX()] = BlockState.SNAKE_HEAD;
-		
+
 		for (int i = 1; i < snakeBody.size(); i++) {
 			gameField[snakeBody.get(i).getY()][snakeBody.get(i).getX()] = BlockState.SNAKE_BODY;
 		}
-		
+
 		gameField[appleCoordinate.getY()][appleCoordinate.getX()] = BlockState.APPLE;
-		
+
 		return gameField;
 	}
 
 	public void move(HeadDirection headDirection) {
 		if (hasCollided)
 			return;
+
+		scoreBoard.addStep();
 
 		int newHeadX = snakeBody.get(0).getX();
 		int newHeadY = snakeBody.get(0).getY();
@@ -136,14 +196,15 @@ public class SnakeGame {
 	private void checkEatApple() {
 		if (appleCoordinate.getX() == snakeBody.get(0).getX() && appleCoordinate.getY() == snakeBody.get(0).getY()) {
 			hasEatenApple = true;
+			scoreBoard.eatApple();
 		}
 	}
 
 	private void spawnApple() {
 		ArrayList<Integer> blocks = new ArrayList<Integer>(FIELD_WIDTH * FIELD_HEIGHT);
 
-		for (int i = 0; i < blocks.size(); i++) {
-			blocks.set(i, i);
+		for (int i = 0; i < FIELD_WIDTH * FIELD_HEIGHT; i++) {
+			blocks.add(i);
 		}
 
 		for (Coordinate part : snakeBody) {
