@@ -13,17 +13,20 @@ public class TrainModel {
 		private int totalNumberOfSteps;
 		private int numberOfApplesEaten;
 		private int numberOfGames;
+		private int sumOfLargestStepsToNewApple;
 
 		AverageScoreBoard() {
 			totalNumberOfSteps = 0;
 			numberOfApplesEaten = 0;
 			numberOfGames = 0;
+			sumOfLargestStepsToNewApple = 0;
 		}
 
 		void addGame(SnakeGame game) {
 			numberOfGames++;
 			totalNumberOfSteps += game.getScoreBoard().getTotalNumberOfSteps();
 			numberOfApplesEaten += game.getScoreBoard().getNumberOfApplesEaten();
+			sumOfLargestStepsToNewApple += game.getScoreBoard().getLargestStepsToNewApple();
 		}
 
 		float getNumberOfStepsPerGame() {
@@ -34,16 +37,21 @@ public class TrainModel {
 			return numberOfApplesEaten / (float) numberOfGames;
 		}
 
-		float getStepsPerApplePerGame() {
-			return totalNumberOfSteps / (float) numberOfApplesEaten / numberOfGames;
+		float getApplesPerStepPerGame() {
+			return numberOfApplesEaten / (float) totalNumberOfSteps / numberOfGames;
+		}
+
+		float getLargestStepsToNewApple() {
+			return sumOfLargestStepsToNewApple / (float) numberOfGames;
 		}
 
 		@Override
 		public String toString() {
 			StringBuilder sb = new StringBuilder();
 			sb.append("NumberOfApplesEatenPerGame: " + getNumberOfApplesEatenPerGame() + "\n");
-			sb.append("StepsPerApplePerGame: " + getStepsPerApplePerGame() + "\n");
+			sb.append("ApplesPerStepPerGame: " + getApplesPerStepPerGame() + "\n");
 			sb.append("NumberOfStepsPerGame: " + getNumberOfStepsPerGame() + "\n");
+			sb.append("LargestStepsToNewApple: " + getLargestStepsToNewApple() + "\n");
 
 			return sb.toString();
 		}
@@ -52,22 +60,21 @@ public class TrainModel {
 
 	public static void train() throws Exception {
 		NeuralNetwork model1 = new NeuralNetwork(
-				new int[] { SnakeGame.FIELD_WIDTH * SnakeGame.FIELD_HEIGHT, 16, 16, 16, 2 },
-				new ActivationFunction[] { ActivationFunction.SIGMOID, ActivationFunction.SIGMOID,
-						ActivationFunction.SIGMOID, ActivationFunction.STEP });
+				new int[] { SnakeGame.FIELD_WIDTH * SnakeGame.FIELD_HEIGHT, 10, 10, 2 }, new ActivationFunction[] {
+						ActivationFunction.SIGMOID, ActivationFunction.SIGMOID, ActivationFunction.STEP });
 
-		model1.mutate(1);
+		model1.mutate(0);
 
-		for (int generation = 1; generation <= 1000; generation++) {
+		for (int generation = 1; generation <= 10000; generation++) {
 			System.out.println("Generation " + generation);
 
-			NeuralNetwork[] variants = new NeuralNetwork[500];
+			NeuralNetwork[] variants = new NeuralNetwork[400];
 
 			variants[0] = model1;
 
 			for (int i = 1; i < variants.length; i++) {
-				variants[i] = variants[i - 1].clone();
-				variants[i].mutate((float) 0.0001);
+				variants[i] = variants[0].clone();
+				variants[i].mutate((float) 0.001);
 			}
 
 			AverageScoreBoard[] avgScoreBoards = new AverageScoreBoard[variants.length];
@@ -75,7 +82,7 @@ public class TrainModel {
 			for (int i = 0; i < variants.length; i++) {
 				avgScoreBoards[i] = new AverageScoreBoard();
 
-				for (int t = 0; t < SnakeGame.FIELD_WIDTH * SnakeGame.FIELD_HEIGHT * 4; t++) {
+				for (int t = 0; t < SnakeGame.FIELD_WIDTH * SnakeGame.FIELD_HEIGHT * 2; t++) {
 					SnakeGame game = new SnakeGame();
 
 					play(game, variants[i]);
@@ -89,19 +96,24 @@ public class TrainModel {
 				if (avgScoreBoards[selectionIndex].getNumberOfApplesEatenPerGame() < avgScoreBoards[i]
 						.getNumberOfApplesEatenPerGame()) {
 					selectionIndex = i;
-				} else if (avgScoreBoards[selectionIndex].getNumberOfApplesEatenPerGame() == avgScoreBoards[i]
-						.getNumberOfApplesEatenPerGame()) {
-//					if (avgScoreBoards[selectionIndex].getStepsPerApplePerGame() > avgScoreBoards[i].getStepsPerApplePerGame()) {
-//						selectionIndex = i;
-//					} else if (avgScoreBoards[selectionIndex].getStepsPerApplePerGame() == avgScoreBoards[i].getStepsPerApplePerGame()) {
-//						
-//					}
+					
+					continue;
 				}
-//				if (avgScoreBoards[selectionIndex].getNumberOfStepsPerGame() < avgScoreBoards[i].getNumberOfStepsPerGame()) {
+				
+//				if (avgScoreBoards[selectionIndex].getLargestStepsToNewApple() > avgScoreBoards[i]
+//						.getLargestStepsToNewApple()) {
 //					selectionIndex = i;
-//				} else if (avgScoreBoards[selectionIndex].getNumberOfStepsPerGame() == avgScoreBoards[i].getNumberOfStepsPerGame()) {
 //					
+//					continue;
 //				}
+//				
+//				if (avgScoreBoards[selectionIndex].getNumberOfStepsPerGame() < avgScoreBoards[i]
+//						.getNumberOfStepsPerGame()) {
+//					selectionIndex = i;
+//					
+//					continue;
+//				}
+
 			}
 
 			model1 = variants[selectionIndex];
@@ -148,13 +160,13 @@ public class TrainModel {
 	private static int convertToNumber(BlockState blockState) {
 		switch (blockState) {
 		case APPLE:
-			return 3;
+			return 2;
 		case EMPTY:
 			return 0;
 		case SNAKE_BODY:
-			return 1;
+			return -1;
 		case SNAKE_HEAD:
-			return 2;
+			return 1;
 		}
 		return 0;
 	}
