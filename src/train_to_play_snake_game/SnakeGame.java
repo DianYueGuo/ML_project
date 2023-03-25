@@ -4,8 +4,8 @@ import java.util.ArrayList;
 
 public class SnakeGame {
 
-	public final static int FIELD_WIDTH = 16;
-	public final static int FIELD_HEIGHT = 16;
+	public final static int FIELD_WIDTH = 3;
+	public final static int FIELD_HEIGHT = 3;
 
 	private ArrayList<Coordinate> snakeBody;
 	private boolean hasCollided;
@@ -26,10 +26,15 @@ public class SnakeGame {
 
 		private int totalNumberOfSteps;
 		private int numberOfApplesEaten;
+		private int largestStepsToNewApple;
+
+		private int previousAteAppleStep;
 
 		ScoreBoard() {
 			totalNumberOfSteps = 0;
 			numberOfApplesEaten = 0;
+			largestStepsToNewApple = 0;
+			previousAteAppleStep = 0;
 		}
 
 		void addStep() {
@@ -38,6 +43,20 @@ public class SnakeGame {
 
 		void eatApple() {
 			numberOfApplesEaten++;
+
+			if (largestStepsToNewApple < totalNumberOfSteps - previousAteAppleStep) {
+				largestStepsToNewApple = totalNumberOfSteps - previousAteAppleStep;
+			}
+
+			previousAteAppleStep = totalNumberOfSteps;
+		}
+
+		int getLargestStepsToNewApple() {
+			if (numberOfApplesEaten == 0) {
+				return totalNumberOfSteps;
+			}
+
+			return largestStepsToNewApple;
 		}
 
 		int getTotalNumberOfSteps() {
@@ -48,19 +67,15 @@ public class SnakeGame {
 			return numberOfApplesEaten;
 		}
 
-		float getStepsPerApple() {
-			if (numberOfApplesEaten != 0) {
-				return totalNumberOfSteps / (float) numberOfApplesEaten;
-			} else {
-				return Float.MAX_VALUE;
-			}
+		float getApplesPerStep() {
+			return numberOfApplesEaten / (float) totalNumberOfSteps;
 		}
 
 		@Override
 		public String toString() {
 			StringBuilder sb = new StringBuilder();
 			sb.append("NumberOfApplesEaten: " + numberOfApplesEaten + "\n");
-			sb.append("StepsPerApple: " + getStepsPerApple() + "\n");
+			sb.append("ApplesPerStep: " + getApplesPerStep() + "\n");
 			sb.append("TotalNumberOfSteps: " + totalNumberOfSteps + "\n");
 
 			return sb.toString();
@@ -139,7 +154,9 @@ public class SnakeGame {
 			gameField[snakeBody.get(i).getY()][snakeBody.get(i).getX()] = BlockState.SNAKE_BODY;
 		}
 
-		gameField[appleCoordinate.getY()][appleCoordinate.getX()] = BlockState.APPLE;
+		if (appleCoordinate != null) {
+			gameField[appleCoordinate.getY()][appleCoordinate.getX()] = BlockState.APPLE;
+		}
 
 		return gameField;
 	}
@@ -194,9 +211,12 @@ public class SnakeGame {
 	}
 
 	private void checkEatApple() {
-		if (appleCoordinate.getX() == snakeBody.get(0).getX() && appleCoordinate.getY() == snakeBody.get(0).getY()) {
-			hasEatenApple = true;
-			scoreBoard.eatApple();
+		if (appleCoordinate != null) {
+			if (appleCoordinate.getX() == snakeBody.get(0).getX()
+					&& appleCoordinate.getY() == snakeBody.get(0).getY()) {
+				hasEatenApple = true;
+				scoreBoard.eatApple();
+			}
 		}
 	}
 
@@ -219,11 +239,15 @@ public class SnakeGame {
 			}
 		}
 
-		int randomNumber = (int) (Math.random() * blocks.size());
-		int newAppleX = blocks.get(randomNumber) % FIELD_WIDTH;
-		int newAppleY = blocks.get(randomNumber) / FIELD_WIDTH;
+		if (blocks.size() > 0) {
+			int randomNumber = (int) (Math.random() * blocks.size());
+			int newAppleX = blocks.get(randomNumber) % FIELD_WIDTH;
+			int newAppleY = blocks.get(randomNumber) / FIELD_WIDTH;
 
-		appleCoordinate = new Coordinate(newAppleX, newAppleY);
+			appleCoordinate = new Coordinate(newAppleX, newAppleY);
+		} else {
+			appleCoordinate = null;
+		}
 	}
 
 }
