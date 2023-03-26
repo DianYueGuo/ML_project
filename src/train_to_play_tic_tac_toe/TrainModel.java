@@ -8,74 +8,47 @@ import train_to_play_tic_tac_toe.TicTacToeGame.BlockState;
 public class TrainModel {
 
 	public static NeuralNetwork train() throws Exception {
-		NeuralNetwork model1 = new NeuralNetwork(new int[] { 9, 36, 36, 1 }, new ActivationFunction[] {
-				ActivationFunction.SIGMOID, ActivationFunction.SIGMOID, ActivationFunction.SIGMOID });
-		NeuralNetwork model2 = model1.clone();
+		NeuralNetwork model1 = new NeuralNetwork(new int[] { 9, 9, 1 },
+				new ActivationFunction[] { ActivationFunction.SIGMOID, ActivationFunction.SIGMOID });
 
-		model1.mutate(1);
-		model2.mutate(1);
+		model1.mutate(0);
 
-		for (int generation = 0; generation < 1000; generation++) {
+		for (int generation = 0; generation < 10000; generation++) {
 			NeuralNetwork[] players1 = new NeuralNetwork[100];
-			NeuralNetwork[] players2 = new NeuralNetwork[players1.length];
 
 			players1[0] = model1;
 			for (int i = 1; i < players1.length; i++) {
 				players1[i] = model1.clone();
-				players1[i].mutate(0.005f);
+				players1[i].mutate(0.002f);
 			}
 
-			players2[0] = model2;
-			for (int i = 1; i < players2.length; i++) {
-				players2[i] = model2.clone();
-				players2[i].mutate(0.005f);
-			}
-
-			int[] scores1 = new int[players1.length];
-			int[] scores2 = new int[players1.length];
+			float[] scores1 = new float[players1.length];
+			int repeat_times = 100;
 			for (int i = 0; i < players1.length; i++) {
-				TicTacToeGame game1 = match(model2, players1[i]);
-				switch (game1.getGameState()) {
-				case DRAW:
-					scores1[i]++;
-					break;
-				case PLAYER2_WIN:
-					scores1[i]++;
-					break;
-				}
+				for (int t = 0; t < repeat_times; t++) {
+					TicTacToeGame game1 = match(null, players1[i]);
+					switch (game1.getGameState()) {
+					case DRAW:
+						scores1[i] += 0.1;
+						break;
+					case PLAYER2_WIN:
+						scores1[i] += 0.5;
+						break;
+					}
 
-				game1 = match(players1[i], model2);
-				switch (game1.getGameState()) {
-				case DRAW:
-					scores1[i]++;
-					break;
-				case PLAYER1_WIN:
-					scores1[i]++;
-					break;
-				}
-				
-				TicTacToeGame game2 = match(model1, players2[i]);
-				switch (game2.getGameState()) {
-				case DRAW:
-					scores2[i]++;
-					break;
-				case PLAYER2_WIN:
-					scores2[i]++;
-					break;
-				}
-
-				game2 = match(players2[i], model1);
-				switch (game2.getGameState()) {
-				case DRAW:
-					scores2[i]++;
-					break;
-				case PLAYER1_WIN:
-					scores2[i]++;
-					break;
+					game1 = match(players1[i], null);
+					switch (game1.getGameState()) {
+					case DRAW:
+						scores1[i] += 0.1;
+						break;
+					case PLAYER1_WIN:
+						scores1[i] += 0.5;
+						break;
+					}
 				}
 			}
 
-			int max_score1 = 0;
+			float max_score1 = 0;
 			int max_score_index1 = 0;
 			for (int i = 0; i < scores1.length; i++) {
 				if (scores1[i] >= max_score1) {
@@ -85,20 +58,10 @@ public class TrainModel {
 			}
 
 			model1 = players1[max_score_index1];
-			
-			int max_score2 = 0;
-			int max_score_index2 = 0;
-			for (int i = 0; i < scores2.length; i++) {
-				if (scores2[i] >= max_score2) {
-					max_score2 = scores2[i];
-					max_score_index2 = i;
-				}
-			}
-
-			model2 = players2[max_score_index2];
 
 			System.out.println("generation: " + generation);
-			System.out.println(match(model1, model2));
+			System.out.println("max_score: " + max_score1 / repeat_times);
+			System.out.println(match(model1, model1));
 		}
 
 		return model1;
@@ -125,7 +88,7 @@ public class TrainModel {
 	}
 
 	public static int getNextMove(NeuralNetwork model, TicTacToeGame game) throws Exception {
-		if (model.getLayerDepth(0) != 9 || model.getLayerDepth(model.getNumberOfLayers() - 1) != 1)
+		if (model != null && (model.getLayerDepth(0) != 9 || model.getLayerDepth(model.getNumberOfLayers() - 1) != 1))
 			throw new Exception();
 
 		float maxProbability = 0;
@@ -149,12 +112,22 @@ public class TrainModel {
 				break;
 			}
 
-			FloatMatrix modelOutput = model.getOutput(new FloatMatrix(board).transpose());
+			if (model != null) {
+				FloatMatrix modelOutput = model.getOutput(new FloatMatrix(board).transpose());
 
-			if (modelOutput.get(0, 0) > maxProbability) {
-				maxProbability = modelOutput.get(0, 0);
-				nextMove = i;
+				if (modelOutput.get(0, 0) > maxProbability) {
+					maxProbability = modelOutput.get(0, 0);
+					nextMove = i;
+				}
+			} else {
+				float randomNumber = (float) Math.random();
+
+				if (randomNumber > maxProbability) {
+					maxProbability = randomNumber;
+					nextMove = i;
+				}
 			}
+
 		}
 
 		return nextMove;
