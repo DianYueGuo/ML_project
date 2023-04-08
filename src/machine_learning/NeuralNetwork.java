@@ -6,61 +6,61 @@ import org.json.JSONString;
 
 public class NeuralNetwork implements JSONString {
 
-	private int[] layerDepths;
+	private int[] LayerWidths;
 	private ActivationFunction[] activationFunctions;
 	private DoubleMatrix[] variables;
 	private int numberOfVariables;
 
 	/*
-	 * layerDepths[0] is the depth of the input layer.
-	 * layerDepths[layerDepths.lenght - 1] is the depth of the output layer.
+	 * LayerWidths[0] is the width of the input layer.
+	 * layerWidths[layerWidths.lenght - 1] is the width of the output layer.
 	 * 
-	 * activationFunctions.length should be equal to layerDepths.length - 1.
+	 * activationFunctions.length should be equal to layerWidths.length - 1.
 	 */
-	public NeuralNetwork(int[] layerDepths, ActivationFunction[] activationFunctions) throws Exception {
-		if (layerDepths.length < 2)
+	public NeuralNetwork(int[] layerWidths, ActivationFunction[] activationFunctions) throws Exception {
+		if (layerWidths.length < 2)
 			throw new Exception();
-		this.layerDepths = new int[layerDepths.length];
+		this.LayerWidths = new int[LayerWidths.length];
 
-		for (int i = 0; i < layerDepths.length; i++) {
-			if (layerDepths[i] <= 0)
+		for (int i = 0; i < LayerWidths.length; i++) {
+			if (LayerWidths[i] <= 0)
 				throw new Exception();
-			this.layerDepths[i] = layerDepths[i];
+			this.LayerWidths[i] = LayerWidths[i];
 		}
 
-		if (activationFunctions.length != layerDepths.length - 1)
+		if (activationFunctions.length != LayerWidths.length - 1)
 			throw new Exception();
 		this.activationFunctions = new ActivationFunction[activationFunctions.length];
 		for (int i = 0; i < activationFunctions.length; i++) {
 			this.activationFunctions[i] = activationFunctions[i];
 		}
 
-		variables = new DoubleMatrix[layerDepths.length - 1];
+		variables = new DoubleMatrix[LayerWidths.length - 1];
 		for (int i = 0; i < variables.length; i++) {
 			/*
-			 * the first 1 to layerDepths[i] columns are for weight variables, and the last
-			 * column, layerDepths[i] + 1, is for bias variables.
+			 * the first 1 to LayerWidths[i] columns are for weight variables, and the last
+			 * column, LayerWidths[i] + 1, is for bias variables.
 			 */
-			variables[i] = new DoubleMatrix(layerDepths[i + 1], layerDepths[i] + 1);
+			variables[i] = new DoubleMatrix(LayerWidths[i + 1], LayerWidths[i] + 1);
 		}
 
 		setNumberOfVariables();
 	}
 
 	public NeuralNetwork(JSONObject JO) throws Exception {
-		JSONArray jSONLayerDepthsArray = JO.getJSONArray("layerDepths");
-		if (jSONLayerDepthsArray.length() < 2)
+		JSONArray jSONLayerWidthsArray = JO.getJSONArray("LayerWidths");
+		if (jSONLayerWidthsArray.length() < 2)
 			throw new Exception();
-		layerDepths = new int[jSONLayerDepthsArray.length()];
+		LayerWidths = new int[jSONLayerWidthsArray.length()];
 
-		for (int i = 0; i < layerDepths.length; i++) {
-			if (jSONLayerDepthsArray.getInt(i) <= 0)
+		for (int i = 0; i < LayerWidths.length; i++) {
+			if (jSONLayerWidthsArray.getInt(i) <= 0)
 				throw new Exception();
-			layerDepths[i] = jSONLayerDepthsArray.getInt(i);
+			LayerWidths[i] = jSONLayerWidthsArray.getInt(i);
 		}
 
 		JSONArray jSONActivationFunctionsArray = JO.getJSONArray("activationFunctions");
-		if (jSONActivationFunctionsArray.length() != layerDepths.length - 1)
+		if (jSONActivationFunctionsArray.length() != LayerWidths.length - 1)
 			throw new Exception();
 		activationFunctions = new ActivationFunction[jSONActivationFunctionsArray.length()];
 		for (int i = 0; i < activationFunctions.length; i++) {
@@ -68,11 +68,11 @@ public class NeuralNetwork implements JSONString {
 		}
 
 		JSONArray jSONVariablesArray = JO.getJSONArray("variables");
-		variables = new DoubleMatrix[layerDepths.length - 1];
+		variables = new DoubleMatrix[LayerWidths.length - 1];
 		for (int i = 0; i < variables.length; i++) {
 			/*
-			 * the first 1 to layerDepths[i] columns are for weight variables, and the last
-			 * column, layerDepths[i] + 1, is for bias variables.
+			 * the first 1 to LayerWidths[i] columns are for weight variables, and the last
+			 * column, LayerWidths[i] + 1, is for bias variables.
 			 */
 			variables[i] = new DoubleMatrix(jSONVariablesArray.getJSONObject(i));
 		}
@@ -92,14 +92,14 @@ public class NeuralNetwork implements JSONString {
 	}
 
 	public int getNumberOfLayers() {
-		return layerDepths.length;
+		return LayerWidths.length;
 	}
 
-	public int getLayerDepth(int index) throws Exception {
+	public int getLayerWidth(int index) throws Exception {
 		if (index < 0 || index >= getNumberOfLayers())
 			throw new Exception();
 
-		return layerDepths[index];
+		return LayerWidths[index];
 	}
 
 	/*
@@ -108,8 +108,8 @@ public class NeuralNetwork implements JSONString {
 	public double getWeightVariable(int index, int inNode_index, int outNode_index) throws Exception {
 		if (index < 0 || index >= variables.length)
 			throw new Exception();
-		if (inNode_index < 0 || inNode_index >= getLayerDepth(index) || outNode_index < 0
-				|| outNode_index >= getLayerDepth(index + 1))
+		if (inNode_index < 0 || inNode_index >= getLayerWidth(index) || outNode_index < 0
+				|| outNode_index >= getLayerWidth(index + 1))
 			throw new Exception();
 
 		return variables[index].get(outNode_index, inNode_index);
@@ -121,17 +121,17 @@ public class NeuralNetwork implements JSONString {
 	public double getBiasVariable(int index, int outNode_index) throws Exception {
 		if (index < 0 || index >= variables.length)
 			throw new Exception();
-		if (outNode_index < 0 || outNode_index >= getLayerDepth(index + 1))
+		if (outNode_index < 0 || outNode_index >= getLayerWidth(index + 1))
 			throw new Exception();
 
-		return variables[index].get(outNode_index, getLayerDepth(index + 1) - 1);
+		return variables[index].get(outNode_index, getLayerWidth(index + 1) - 1);
 	}
 
 	public void setWeightVariable(int index, int inNode_index, int outNode_index, double value) throws Exception {
 		if (index < 0 || index >= variables.length)
 			throw new Exception();
-		if (inNode_index < 0 || inNode_index >= getLayerDepth(index) || outNode_index < 0
-				|| outNode_index >= getLayerDepth(index + 1))
+		if (inNode_index < 0 || inNode_index >= getLayerWidth(index) || outNode_index < 0
+				|| outNode_index >= getLayerWidth(index + 1))
 			throw new Exception();
 
 		variables[index].set(outNode_index, inNode_index, value);
@@ -140,10 +140,10 @@ public class NeuralNetwork implements JSONString {
 	public void setBiasVariable(int index, int outNode_index, double value) throws Exception {
 		if (index < 0 || index >= variables.length)
 			throw new Exception();
-		if (outNode_index < 0 || outNode_index >= getLayerDepth(index + 1))
+		if (outNode_index < 0 || outNode_index >= getLayerWidth(index + 1))
 			throw new Exception();
 
-		variables[index].set(outNode_index, getLayerDepth(index + 1) - 1, value);
+		variables[index].set(outNode_index, getLayerWidth(index + 1) - 1, value);
 	}
 
 	private void setNumberOfVariables() {
@@ -200,7 +200,7 @@ public class NeuralNetwork implements JSONString {
 	}
 
 	public DoubleMatrix getOutput(DoubleMatrix inputLayer) throws Exception {
-		if (inputLayer.getNumberOfColumns() != 1 || inputLayer.getNumberOfRows() != layerDepths[0])
+		if (inputLayer.getNumberOfColumns() != 1 || inputLayer.getNumberOfRows() != LayerWidths[0])
 			throw new Exception();
 
 		DoubleMatrix propagatedValues = inputLayer;
@@ -253,7 +253,7 @@ public class NeuralNetwork implements JSONString {
 	public String toJSONString() {
 		JSONObject JO = new JSONObject();
 
-		JO.put("layerDepths", layerDepths);
+		JO.put("LayerWidths", LayerWidths);
 		JO.put("activationFunctions", activationFunctions);
 		JO.put("variables", variables);
 
@@ -263,7 +263,7 @@ public class NeuralNetwork implements JSONString {
 	@Override
 	public NeuralNetwork clone() {
 		try {
-			NeuralNetwork newNeuralNetwork = new NeuralNetwork(layerDepths, activationFunctions);
+			NeuralNetwork newNeuralNetwork = new NeuralNetwork(LayerWidths, activationFunctions);
 
 			for (int i = 0; i < newNeuralNetwork.variables.length; i++) {
 				newNeuralNetwork.variables[i] = this.variables[i].clone();

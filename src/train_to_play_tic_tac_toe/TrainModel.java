@@ -141,7 +141,7 @@ public class TrainModel {
 	}
 
 	public static int getNextMove(NeuralNetwork model, TicTacToeGame game) throws Exception {
-		if (model != null && (model.getLayerDepth(0) != 9 || model.getLayerDepth(model.getNumberOfLayers() - 1) != 1))
+		if (model != null && (model.getLayerWidth(0) != 9 || model.getLayerWidth(model.getNumberOfLayers() - 1) != 1))
 			throw new Exception();
 
 		double maxProbability = 0;
