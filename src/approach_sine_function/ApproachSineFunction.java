@@ -4,7 +4,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import machine_learning.ActivationFunction;
-import machine_learning.FloatMatrix;
+import machine_learning.DoubleMatrix;
 import machine_learning.NeuralNetwork;
 
 public class ApproachSineFunction {
@@ -17,7 +17,7 @@ public class ApproachSineFunction {
 
 		System.out.println(model);
 
-		float minSsd = 1000;
+		double minSsd = 1000;
 
 		for (int generation = 0; generation < 2000 && minSsd >= 0.01; generation++) {
 
@@ -27,11 +27,11 @@ public class ApproachSineFunction {
 				NeuralNetwork variant = model.clone();
 				variant.mutate(0.005f);
 
-				float ssd = 0;
+				double ssd = 0;
 				for (int testPoint = 0; testPoint < 100; testPoint++) {
-					float x = (float) (2 * Math.PI * testPoint / 100);
+					double x = 2 * Math.PI * testPoint / 100;
 
-					ssd += Math.pow(variant.getOutput(new FloatMatrix(new float[][] { { x } }).transpose()).get(0, 0)
+					ssd += Math.pow(variant.getOutput(new DoubleMatrix(new double[][] { { x } }).transpose()).get(0, 0)
 							- Math.sin(x), 2);
 				}
 
@@ -54,8 +54,8 @@ public class ApproachSineFunction {
 		NeuralNetwork model = new NeuralNetwork(new JSONObject(str));
 
 		for (int testPoint = 0; testPoint < 100; testPoint++) {
-			float x = (float) (2 * Math.PI * testPoint / 100);
-			System.out.println(model.getOutput(new FloatMatrix(new float[][] { { x } }).transpose()).get(0, 0));
+			double x = 2 * Math.PI * testPoint / 100;
+			System.out.println(model.getOutput(new DoubleMatrix(new double[][] { { x } }).transpose()).get(0, 0));
 		}
 	}
 

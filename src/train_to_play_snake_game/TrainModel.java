@@ -1,7 +1,7 @@
 package train_to_play_snake_game;
 
 import machine_learning.ActivationFunction;
-import machine_learning.FloatMatrix;
+import machine_learning.DoubleMatrix;
 import machine_learning.NeuralNetwork;
 import train_to_play_snake_game.SnakeGame.BlockState;
 import train_to_play_snake_game.SnakeGame.HeadDirection;
@@ -29,20 +29,20 @@ public class TrainModel {
 			sumOfLargestStepsToNewApple += game.getScoreBoard().getLargestStepsToNewApple();
 		}
 
-		float getNumberOfStepsPerGame() {
-			return totalNumberOfSteps / (float) numberOfGames;
+		double getNumberOfStepsPerGame() {
+			return totalNumberOfSteps / (double) numberOfGames;
 		}
 
-		float getNumberOfApplesEatenPerGame() {
-			return numberOfApplesEaten / (float) numberOfGames;
+		double getNumberOfApplesEatenPerGame() {
+			return numberOfApplesEaten / (double) numberOfGames;
 		}
 
-		float getApplesPerStepPerGame() {
-			return numberOfApplesEaten / (float) totalNumberOfSteps / numberOfGames;
+		double getApplesPerStepPerGame() {
+			return numberOfApplesEaten / (double) totalNumberOfSteps / numberOfGames;
 		}
 
-		float getLargestStepsToNewApple() {
-			return sumOfLargestStepsToNewApple / (float) numberOfGames;
+		double getLargestStepsToNewApple() {
+			return sumOfLargestStepsToNewApple / (double) numberOfGames;
 		}
 
 		@Override
@@ -74,7 +74,7 @@ public class TrainModel {
 
 			for (int i = 1; i < variants.length; i++) {
 				variants[i] = variants[0].clone();
-				variants[i].mutate((float) 0.001);
+				variants[i].mutate(0.001);
 			}
 
 			AverageScoreBoard[] avgScoreBoards = new AverageScoreBoard[variants.length];
@@ -133,7 +133,7 @@ public class TrainModel {
 	}
 
 	public static HeadDirection getDirection(BlockState[][] gameField, NeuralNetwork model) throws Exception {
-		float[][] inputArray = new float[1][SnakeGame.FIELD_HEIGHT * SnakeGame.FIELD_WIDTH];
+		double[][] inputArray = new double[1][SnakeGame.FIELD_HEIGHT * SnakeGame.FIELD_WIDTH];
 
 		for (int y = 0; y < gameField.length; y++) {
 			for (int x = 0; x < gameField[0].length; x++) {
@@ -141,7 +141,7 @@ public class TrainModel {
 			}
 		}
 
-		FloatMatrix outputMatrix = model.getOutput(new FloatMatrix(inputArray).transpose());
+		DoubleMatrix outputMatrix = model.getOutput(new DoubleMatrix(inputArray).transpose());
 		int ouputNumber = (int) (outputMatrix.get(0, 0) + 2 * outputMatrix.get(1, 0));
 
 		switch (ouputNumber) {

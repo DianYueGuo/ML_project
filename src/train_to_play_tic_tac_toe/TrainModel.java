@@ -4,7 +4,7 @@ import java.util.Arrays;
 import java.util.Comparator;
 
 import machine_learning.ActivationFunction;
-import machine_learning.FloatMatrix;
+import machine_learning.DoubleMatrix;
 import machine_learning.NeuralNetwork;
 import train_to_play_tic_tac_toe.TicTacToeGame.BlockState;
 
@@ -13,7 +13,7 @@ public class TrainModel {
 	static class Player_and_score_combine {
 
 		private NeuralNetwork player;
-		private float score;
+		private double score;
 
 		Player_and_score_combine(NeuralNetwork player) {
 			this.setPlayer(player);
@@ -28,11 +28,11 @@ public class TrainModel {
 			this.player = player;
 		}
 
-		public float getScore() {
+		public double getScore() {
 			return score;
 		}
 
-		public void addSore(float score) {
+		public void addSore(double score) {
 			this.score += score;
 		}
 
@@ -144,13 +144,13 @@ public class TrainModel {
 		if (model != null && (model.getLayerDepth(0) != 9 || model.getLayerDepth(model.getNumberOfLayers() - 1) != 1))
 			throw new Exception();
 
-		float maxProbability = 0;
+		double maxProbability = 0;
 		int nextMove = 0;
 		for (int i = 0; i < 9; i++) {
 			if (!game.isLegalToMark(i))
 				continue;
 
-			float[][] board = new float[][] { { convertToNumber(game.getBlockState(0)),
+			double[][] board = new double[][] { { convertToNumber(game.getBlockState(0)),
 					convertToNumber(game.getBlockState(1)), convertToNumber(game.getBlockState(2)),
 					convertToNumber(game.getBlockState(3)), convertToNumber(game.getBlockState(4)),
 					convertToNumber(game.getBlockState(5)), convertToNumber(game.getBlockState(6)),
@@ -166,14 +166,14 @@ public class TrainModel {
 			}
 
 			if (model != null) {
-				FloatMatrix modelOutput = model.getOutput(new FloatMatrix(board).transpose());
+				DoubleMatrix modelOutput = model.getOutput(new DoubleMatrix(board).transpose());
 
 				if (modelOutput.get(0, 0) > maxProbability) {
 					maxProbability = modelOutput.get(0, 0);
 					nextMove = i;
 				}
 			} else {
-				float randomNumber = (float) Math.random();
+				double randomNumber = Math.random();
 
 				if (randomNumber > maxProbability) {
 					maxProbability = randomNumber;
