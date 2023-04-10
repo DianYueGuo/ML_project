@@ -47,16 +47,16 @@ public class TrainModel {
 	public static void train() throws Exception {
 		PrintWriter writer = new PrintWriter("/Users/Joseph/Desktop/" + new Date() + ".csv", "UTF-8");
 		System.out.println("create file: \"/Users/Joseph/Desktop/" + new Date() + ".csv\"");
-		
+
 		writer.println("generation, max_score");
-		
+
 		int numberOfSpecies = 10;
 		int numberOfOffsprints = 20;
 		Player_and_score_combine[] player_and_score_combine = new Player_and_score_combine[numberOfSpecies
 				* (numberOfOffsprints + 1)];
 
 		for (int i = 0; i < numberOfSpecies; i++) {
-			player_and_score_combine[i] = new Player_and_score_combine(new NeuralNetwork(new int[] { 9, 16, 16, 16, 1 },
+			player_and_score_combine[i] = new Player_and_score_combine(new NeuralNetwork(new int[] { 9, 20, 20, 20, 1 },
 					new ActivationFunction[] { ActivationFunction.SIGMOID, ActivationFunction.SIGMOID,
 							ActivationFunction.SIGMOID, ActivationFunction.SIGMOID }));
 			player_and_score_combine[i].getPlayer().mutate(1);
@@ -78,7 +78,7 @@ public class TrainModel {
 			int test_times = 30;
 			for (int i = 0; i < player_and_score_combine.length; i++) {
 				for (int t = 0; t < test_times; t++) {
-					TicTacToeGame game1 = match(null, player_and_score_combine[i].getPlayer());
+					TicTacToeGame game1 = match(null, player_and_score_combine[i].getPlayer(), false);
 					switch (game1.getGameState()) {
 					case DRAW:
 						player_and_score_combine[i].addSore(0.5);
@@ -88,13 +88,33 @@ public class TrainModel {
 						break;
 					}
 
-					game1 = match(player_and_score_combine[i].getPlayer(), null);
+					game1 = match(player_and_score_combine[i].getPlayer(), null, false);
 					switch (game1.getGameState()) {
 					case DRAW:
 						player_and_score_combine[i].addSore(0.5);
 						break;
 					case PLAYER1_WIN:
 						player_and_score_combine[i].addSore(1);
+						break;
+					}
+					
+					game1 = match(null, player_and_score_combine[i].getPlayer(), true);
+					switch (game1.getGameState()) {
+					case DRAW:
+						player_and_score_combine[i].addSore(-0.5);
+						break;
+					case PLAYER2_WIN:
+						player_and_score_combine[i].addSore(-1);
+						break;
+					}
+
+					game1 = match(player_and_score_combine[i].getPlayer(), null, true);
+					switch (game1.getGameState()) {
+					case DRAW:
+						player_and_score_combine[i].addSore(-0.5);
+						break;
+					case PLAYER1_WIN:
+						player_and_score_combine[i].addSore(-1);
 						break;
 					}
 				}
@@ -119,24 +139,25 @@ public class TrainModel {
 			System.out.println("max_score: " + player_and_score_combine[0].getScore() / test_times);
 //			System.out.println(match(null, player_and_score_combine[0].getPlayer()));
 //			System.out.println(match(player_and_score_combine[0].getPlayer(), null));
-			System.out.println(match(player_and_score_combine[0].getPlayer(), player_and_score_combine[0].getPlayer()));
-		
+			System.out.println(match(player_and_score_combine[0].getPlayer(), player_and_score_combine[0].getPlayer(), false));
+
 			writer.println(generation + "," + player_and_score_combine[0].getScore() / test_times);
 		}
 
 		System.out.println(player_and_score_combine[0].getPlayer());
-		
+
 		writer.println(player_and_score_combine[0].getPlayer());
-		
+
 		writer.close();
-		
+
 		while (true) {
 			PlayTicTacToeGame.playWithAI(player_and_score_combine[0].getPlayer());
 		}
-		
+
 	}
 
-	public static TicTacToeGame match(NeuralNetwork player1, NeuralNetwork player2) throws Exception {
+	public static TicTacToeGame match(NeuralNetwork player1, NeuralNetwork player2, boolean isPlayingBad)
+			throws Exception {
 		TicTacToeGame game = new TicTacToeGame();
 
 		while (game.getGameState() == TicTacToeGame.GameState.PLAYER1_TURN
@@ -144,10 +165,10 @@ public class TrainModel {
 			int nextMove = 0;
 			switch (game.getGameState()) {
 			case PLAYER1_TURN:
-				nextMove = getNextMove(player1, game);
+				nextMove = getNextMove(player1, game, isPlayingBad);
 				break;
 			case PLAYER2_TURN:
-				nextMove = getNextMove(player2, game);
+				nextMove = getNextMove(player2, game, isPlayingBad);
 				break;
 			}
 			game.mark(nextMove);
@@ -156,11 +177,12 @@ public class TrainModel {
 		return game;
 	}
 
-	public static int getNextMove(NeuralNetwork model, TicTacToeGame game) throws Exception {
+	public static int getNextMove(NeuralNetwork model, TicTacToeGame game, boolean isPlayingBad) throws Exception {
 		if (model != null && (model.getLayerWidth(0) != 9 || model.getLayerWidth(model.getNumberOfLayers() - 1) != 1))
 			throw new Exception();
 
 		double maxProbability = 0;
+		double minProbability = 1;
 		int nextMove = 0;
 		for (int i = 0; i < 9; i++) {
 			if (!game.isLegalToMark(i))
@@ -181,19 +203,37 @@ public class TrainModel {
 				break;
 			}
 
-			if (model != null) {
-				DoubleMatrix modelOutput = model.getOutput(new DoubleMatrix(board).transpose());
+			if (!isPlayingBad) {
+				if (model != null) {
+					DoubleMatrix modelOutput = model.getOutput(new DoubleMatrix(board).transpose());
 
-				if (modelOutput.get(0, 0) > maxProbability) {
-					maxProbability = modelOutput.get(0, 0);
-					nextMove = i;
+					if (modelOutput.get(0, 0) > maxProbability) {
+						maxProbability = modelOutput.get(0, 0);
+						nextMove = i;
+					}
+				} else {
+					double randomNumber = Math.random();
+
+					if (randomNumber > maxProbability) {
+						maxProbability = randomNumber;
+						nextMove = i;
+					}
 				}
 			} else {
-				double randomNumber = Math.random();
+				if (model != null) {
+					DoubleMatrix modelOutput = model.getOutput(new DoubleMatrix(board).transpose());
 
-				if (randomNumber > maxProbability) {
-					maxProbability = randomNumber;
-					nextMove = i;
+					if (modelOutput.get(0, 0) < minProbability) {
+						minProbability = modelOutput.get(0, 0);
+						nextMove = i;
+					}
+				} else {
+					double randomNumber = Math.random();
+
+					if (randomNumber < minProbability) {
+						minProbability = randomNumber;
+						nextMove = i;
+					}
 				}
 			}
 

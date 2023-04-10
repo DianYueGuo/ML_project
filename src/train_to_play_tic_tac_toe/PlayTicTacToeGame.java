@@ -35,7 +35,7 @@ public class PlayTicTacToeGame {
 				game.mark(scanner.nextInt());
 				break;
 			case PLAYER2_TURN:
-				game.mark(TrainModel.getNextMove(model, game));
+				game.mark(TrainModel.getNextMove(model, game, false));
 				break;
 			}
 		}
@@ -55,7 +55,7 @@ public class PlayTicTacToeGame {
 				game.mark(scanner.nextInt());
 				break;
 			case PLAYER1_TURN:
-				game.mark(TrainModel.getNextMove(model, game));
+				game.mark(TrainModel.getNextMove(model, game, false));
 				break;
 			}
 		}
