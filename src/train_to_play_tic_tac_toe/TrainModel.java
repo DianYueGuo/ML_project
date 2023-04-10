@@ -1,7 +1,9 @@
 package train_to_play_tic_tac_toe;
 
+import java.io.PrintWriter;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.Date;
 
 import machine_learning.ActivationFunction;
 import machine_learning.DoubleMatrix;
@@ -42,19 +44,25 @@ public class TrainModel {
 
 	}
 
-	public static NeuralNetwork train() throws Exception {
+	public static void train() throws Exception {
+		PrintWriter writer = new PrintWriter("/Users/Joseph/Desktop/" + new Date() + ".csv", "UTF-8");
+		System.out.println("create file: \"/Users/Joseph/Desktop/" + new Date() + ".csv\"");
+		
+		writer.println("generation, max_score");
+		
 		int numberOfSpecies = 10;
-		int numberOfOffsprints = 10;
+		int numberOfOffsprints = 20;
 		Player_and_score_combine[] player_and_score_combine = new Player_and_score_combine[numberOfSpecies
 				* (numberOfOffsprints + 1)];
 
 		for (int i = 0; i < numberOfSpecies; i++) {
-			player_and_score_combine[i] = new Player_and_score_combine(new NeuralNetwork(new int[] { 9, 18, 1 },
-					new ActivationFunction[] { ActivationFunction.SIGMOID, ActivationFunction.SIGMOID }));
+			player_and_score_combine[i] = new Player_and_score_combine(new NeuralNetwork(new int[] { 9, 16, 16, 16, 1 },
+					new ActivationFunction[] { ActivationFunction.SIGMOID, ActivationFunction.SIGMOID,
+							ActivationFunction.SIGMOID, ActivationFunction.SIGMOID }));
 			player_and_score_combine[i].getPlayer().mutate(1);
 		}
 
-		for (int generation = 0; generation < 100; generation++) {
+		for (int generation = 0; generation <= 1000; generation++) {
 			for (int i = 0; i < numberOfSpecies; i++) {
 				player_and_score_combine[i].setScoreToZero();
 			}
@@ -62,34 +70,31 @@ public class TrainModel {
 			for (int i = 0; i < numberOfOffsprints; i++) {
 				for (int j = 0; j < numberOfSpecies; j++) {
 					NeuralNetwork player = player_and_score_combine[j].getPlayer().clone();
-					player.mutate(0.05f);
+					player.mutate(0.01);
 					player_and_score_combine[numberOfSpecies * (i + 1) + j] = new Player_and_score_combine(player);
 				}
 			}
 
-			int test_times = 200;
+			int test_times = 30;
 			for (int i = 0; i < player_and_score_combine.length; i++) {
 				for (int t = 0; t < test_times; t++) {
 					TicTacToeGame game1 = match(null, player_and_score_combine[i].getPlayer());
-//					switch (game1.getGameState()) {
-//					case DRAW:
-//						player_and_score_combine[i].addSore(0.1f);
-//						break;
-//					case PLAYER2_WIN:
-//						player_and_score_combine[i].addSore(0.5f);
-//						break;
-//					}
+					switch (game1.getGameState()) {
+					case DRAW:
+						player_and_score_combine[i].addSore(0.5);
+						break;
+					case PLAYER2_WIN:
+						player_and_score_combine[i].addSore(1);
+						break;
+					}
 
 					game1 = match(player_and_score_combine[i].getPlayer(), null);
 					switch (game1.getGameState()) {
 					case DRAW:
-						player_and_score_combine[i].addSore(0.5f);
+						player_and_score_combine[i].addSore(0.5);
 						break;
 					case PLAYER1_WIN:
 						player_and_score_combine[i].addSore(1);
-						break;
-					case PLAYER2_WIN:
-						player_and_score_combine[i].addSore(0);
 						break;
 					}
 				}
@@ -113,11 +118,22 @@ public class TrainModel {
 			System.out.println("generation: " + generation);
 			System.out.println("max_score: " + player_and_score_combine[0].getScore() / test_times);
 //			System.out.println(match(null, player_and_score_combine[0].getPlayer()));
-			System.out.println(match(player_and_score_combine[0].getPlayer(), null));
+//			System.out.println(match(player_and_score_combine[0].getPlayer(), null));
+			System.out.println(match(player_and_score_combine[0].getPlayer(), player_and_score_combine[0].getPlayer()));
+		
+			writer.println(generation + "," + player_and_score_combine[0].getScore() / test_times);
 		}
 
-		return player_and_score_combine[0].getPlayer();
-
+		System.out.println(player_and_score_combine[0].getPlayer());
+		
+		writer.println(player_and_score_combine[0].getPlayer());
+		
+		writer.close();
+		
+		while (true) {
+			PlayTicTacToeGame.playWithAI(player_and_score_combine[0].getPlayer());
+		}
+		
 	}
 
 	public static TicTacToeGame match(NeuralNetwork player1, NeuralNetwork player2) throws Exception {
