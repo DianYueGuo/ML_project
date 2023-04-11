@@ -179,6 +179,11 @@ public class SnakeGame {
 		case UP:
 			newHeadY--;
 		}
+		
+		if (!hasEatenApple) {
+			snakeBody.remove(snakeBody.size() - 1);
+		}
+		hasEatenApple = false;
 
 		// check collision (if collide, end game)
 		if ((newHeadX < 0) || (newHeadX >= FIELD_WIDTH) || (newHeadY < 0) || (newHeadY >= FIELD_HEIGHT)) {
@@ -194,10 +199,6 @@ public class SnakeGame {
 		}
 
 		snakeBody.add(0, new Coordinate(newHeadX, newHeadY));
-		if (!hasEatenApple) {
-			snakeBody.remove(snakeBody.size() - 1);
-		}
-		hasEatenApple = false;
 
 		checkEatApple();
 
