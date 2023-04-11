@@ -4,8 +4,8 @@ import java.util.ArrayList;
 
 public class SnakeGame {
 
-	public final static int FIELD_WIDTH = 3;
-	public final static int FIELD_HEIGHT = 3;
+	public final static int FIELD_WIDTH = 5;
+	public final static int FIELD_HEIGHT = 5;
 
 	private ArrayList<Coordinate> snakeBody;
 	private boolean hasCollided;
@@ -67,16 +67,12 @@ public class SnakeGame {
 			return numberOfApplesEaten;
 		}
 
-		float getApplesPerStep() {
-			return numberOfApplesEaten / (float) totalNumberOfSteps;
-		}
-
 		@Override
 		public String toString() {
 			StringBuilder sb = new StringBuilder();
-			sb.append("NumberOfApplesEaten: " + numberOfApplesEaten + "\n");
-			sb.append("ApplesPerStep: " + getApplesPerStep() + "\n");
-			sb.append("TotalNumberOfSteps: " + totalNumberOfSteps + "\n");
+			sb.append("totalNumberOfSteps: " + totalNumberOfSteps + "\n");
+			sb.append("numberOfApplesEaten: " + numberOfApplesEaten + "\n");
+			sb.append("largestStepsToNewApple: " + largestStepsToNewApple + "\n");
 
 			return sb.toString();
 		}
@@ -248,6 +244,46 @@ public class SnakeGame {
 		} else {
 			appleCoordinate = null;
 		}
+	}
+
+	@Override
+	public String toString() {
+		BlockState[][] field = this.getGameField();
+		
+		StringBuilder sb = new StringBuilder();
+
+		for (int x = 0; x < field[0].length + 2; x++) {
+			sb.append("-");
+		}
+
+		sb.append("\n");
+
+		for (int y = 0; y < field.length; y++) {
+			sb.append("|");
+			for (int x = 0; x < field[0].length; x++) {
+				switch (field[y][x]) {
+				case APPLE:
+					sb.append("A");
+					break;
+				case EMPTY:
+					sb.append(" ");
+					break;
+				case SNAKE_BODY:
+					sb.append("B");
+					break;
+				case SNAKE_HEAD:
+					sb.append("H");
+					break;
+				}
+			}
+			sb.append("|\n");
+		}
+
+		for (int x = 0; x < field[0].length + 2; x++) {
+			sb.append("-");
+		}
+
+		return sb.toString();
 	}
 
 }
