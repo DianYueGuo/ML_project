@@ -121,7 +121,7 @@ public class TrainModel {
 	}
 
 	public static void play(SnakeGame game, NeuralNetwork model, boolean doesPrint) throws Exception {
-		while (!game.isEnd()) {
+		while (!game.isGameOver()) {
 			if (doesPrint) {
 				System.out.println(game);
 			}

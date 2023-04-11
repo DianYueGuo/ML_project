@@ -30,7 +30,7 @@ public class PlaySnakeGame {
 				game.move(HeadDirection.RIGHT);
 				break;
 			}
-		} while (!game.isEnd());
+		} while (!game.isGameOver());
 		scanner.close();
 
 		System.out.println("GAME OVER");

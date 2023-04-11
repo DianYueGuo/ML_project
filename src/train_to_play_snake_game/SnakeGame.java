@@ -131,7 +131,7 @@ public class SnakeGame {
 		return scoreBoard;
 	}
 
-	public boolean isEnd() {
+	public boolean isGameOver() {
 		return hasCollided;
 	}
 
