@@ -29,8 +29,6 @@ public class PlaySnakeGame {
 			case "d":
 				game.move(HeadDirection.RIGHT);
 				break;
-			default:
-				game.move(HeadDirection.UP);
 			}
 		} while (!game.isEnd());
 		scanner.close();
